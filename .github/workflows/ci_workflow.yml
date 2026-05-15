@@ -46,11 +46,31 @@ jobs:
         path: MLProject/data_preprocessed/
         retention-days: 30
     
-    - name: Copy model to docker build context
+    - name: Find and copy model to docker build context
       run: |
         mkdir -p MLProject/docker_build
-        cp -r MLProject/mlruns/0/${{ steps.mlflow_run.outputs.run_id }}/artifacts/model MLProject/docker_build/
+        
+        # Cari folder model dari mlruns
+        MODEL_PATH=$(find MLProject/mlruns -type d -name "model" -path "*/artifacts/model" | head -1)
+        
+        if [ -z "$MODEL_PATH" ]; then
+          echo "ERROR: Model not found in mlruns!"
+          echo "Available paths in mlruns:"
+          find MLProject/mlruns -type d 2>/dev/null || echo "No mlruns folder"
+          exit 1
+        fi
+        
+        echo "Copying model from: $MODEL_PATH"
+        cp -r "$MODEL_PATH" MLProject/docker_build/
+        
+        # Copy Dockerfile
         cp MLProject/Dockerfile MLProject/docker_build/
+        
+        # Verifikasi
+        echo "Contents of docker_build:"
+        ls -la MLProject/docker_build/
+        echo "Contents of docker_build/model:"
+        ls -la MLProject/docker_build/model/ || echo "Model folder empty!"
     
     - name: Build Docker Image
       run: |
