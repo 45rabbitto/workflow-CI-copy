@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_HUB_USERNAME: 45rabbitto
-  DOCKER_HUB_REPO: diamonds-price-prediction
+  DOCKER_HUB_REPO: diamonds-price-prediction-copy
 
 jobs:
   mlflow-project:
